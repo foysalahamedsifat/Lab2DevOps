@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Welcome to COMP367</title>
+    <title>Welcome Greeting</title>
 </head>
 <body>
     <%
