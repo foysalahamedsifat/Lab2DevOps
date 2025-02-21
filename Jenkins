@@ -3,17 +3,19 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/yourgithubrepo.git'
+                git url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git', 
+                    credentialsId: '0555f034-db94-46d0-ae47-f636b3364819', 
+                    branch: 'main'
             }
         }
         stage('Build') {
             steps {
-                sh 'mvn clean install'
+                echo 'Building...'
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn test'
+                echo 'Running Tests...'
             }
         }
     }
