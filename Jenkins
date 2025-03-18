@@ -1,62 +1,18 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
-        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'
-    }
-
-    tools {
-        maven 'Maven3'
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Docker Login Direct') {
             steps {
-                git url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git',
-                    branch: 'main'
+                powershell '''
+                    $DOCKER_USER = "foysalahamedsifat"
+                    $DOCKER_PAT = "dckr_pat_xuM6jnV7blrBfi33qluB7fwYH2U"
+                    
+                    docker logout
+                    
+                    $DOCKER_PAT | docker login -u $DOCKER_USER --password-stdin
+                '''
             }
-        }
-
-        stage('Build') {
-            steps {
-                bat 'mvn clean package'
-            }
-        }
-
-        stage('Docker Login') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: "${DOCKER_CREDENTIALS_ID}",
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PAT'
-                )]) {
-                    powershell '''
-                        Write-Host "Logging into Docker Hub..."
-                        docker logout
-                        $ErrorActionPreference = "Stop"
-                        $env:DOCKER_PAT | docker login -u $env:DOCKER_USER --password-stdin
-                    '''
-                }
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                powershell "docker build -t ${env.DOCKER_IMAGE} ."
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                powershell "docker push ${env.DOCKER_IMAGE}"
-            }
-        }
-    }
-
-    post {
-        always {
-            powershell 'docker logout'
         }
     }
 }
