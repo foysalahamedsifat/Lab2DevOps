@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
-        DOCKER_CREDENTIALS_ID = 'dckr_pat_Xs-Q8ETJK6KMYj7vnmEGlFGjK7Y'  // Update this with your Jenkins credential ID
+        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'  // Update this with your Jenkins credential ID
     }
 
     tools {
