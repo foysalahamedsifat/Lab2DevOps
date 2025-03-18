@@ -1,17 +1,9 @@
 pipeline {
     agent any
-
     stages {
-        stage('Docker Login Direct') {
+        stage('Who Am I?') {
             steps {
-                powershell '''
-                    $DOCKER_USER = "foysalahamedsifat"
-                    $DOCKER_PAT = "dckr_pat_xuM6jnV7blrBfi33qluB7fwYH2U"
-                    
-                    docker logout
-                    
-                    $DOCKER_PAT | docker login -u $DOCKER_USER --password-stdin
-                '''
+                powershell 'whoami'
             }
         }
     }
