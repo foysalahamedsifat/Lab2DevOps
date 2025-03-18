@@ -3,56 +3,46 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
-        DOCKER_CREDENTIALS_ID = '0555f034-db94-46d0-ae47-f636b3364819'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'  // Update this with your Jenkins credential ID
     }
 
     tools {
-        maven 'Maven3'   // Make sure Maven3 is installed in Jenkins > Global Tools
+        maven 'Maven3'  // Assuming you configured Maven under Global Tools in Jenkins
     }
 
     stages {
-
-        // Checkout stage [1 mark]
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git', 
-                    credentialsId: "${DOCKER_CREDENTIALS_ID}", 
+                git url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git',
+                    credentialsId: "${DOCKER_CREDENTIALS_ID}",
                     branch: 'main'
             }
         }
 
-        // Build Maven project stage [1 mark]
         stage('Build') {
             steps {
-                bat '"%MAVEN_HOME%\\bin\\mvn" clean package'
+                bat 'mvn clean package'
             }
         }
 
-        // Docker Login stage [4 marks]
         stage('Docker Login') {
             steps {
-                bat 'docker --version'  // Confirm Docker CLI is working
-
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    // Safer login using --password-stdin if possible
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PAT')]) {
                     powershell '''
-                        $ErrorActionPreference = "Stop"
-                        echo "Logging into Docker Hub..."
+                        Write-Host "Logging into Docker Hub..."
                         docker logout
-                        $env:DOCKER_PASS | docker login -u $env:DOCKER_USER --password-stdin
+                        $env:DOCKER_PAT | docker login -u $env:DOCKER_USER --password-stdin
                     '''
                 }
             }
         }
 
-        // Docker Build stage [1 mark]
         stage('Docker Build') {
             steps {
                 bat "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
-        // Docker Push stage [1 mark]
         stage('Docker Push') {
             steps {
                 bat "docker push ${DOCKER_IMAGE}"
