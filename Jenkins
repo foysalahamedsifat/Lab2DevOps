@@ -11,7 +11,9 @@ pipeline {
         // Checkout stage [1 mark]
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git'
+                git url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git', 
+                    credentialsId: '0555f034-db94-46d0-ae47-f636b3364819', 
+                    branch: 'main'
             }
         }
 
