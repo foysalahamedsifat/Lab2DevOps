@@ -1,6 +1,14 @@
 pipeline {
     agent any
+
+    environment {
+        DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
+        DOCKER_CREDENTIALS_ID = '0555f034-db94-46d0-ae47-f636b3364819' // This is fine if it's your Jenkins Credential ID
+    }
+
     stages {
+
+        // Checkout stage [1 mark]
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git', 
@@ -8,15 +16,44 @@ pipeline {
                     branch: 'main'
             }
         }
+
+        // Build Maven project stage [1 mark]
         stage('Build') {
             steps {
-                echo 'Building...'
+                sh 'mvn clean package'
             }
         }
-        stage('Test') {
+
+        // Docker Login stage [4 marks]
+        stage('Docker Login') {
             steps {
-                echo 'Running Tests...'
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
             }
+        }
+
+        // Docker build stage [1 mark]
+        stage('Docker Build') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+
+        // Docker push stage [1 mark]
+        stage('Docker Push') {
+            steps {
+                sh "docker push ${DOCKER_IMAGE}"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
