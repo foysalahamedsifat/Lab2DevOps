@@ -3,11 +3,11 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
-        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'  // Update this with your Jenkins credential ID
+        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'  // Jenkins credential ID for Docker Hub PAT
     }
 
     tools {
-        maven 'Maven3'  // Assuming you configured Maven under Global Tools in Jenkins
+        maven 'Maven3'  // Maven tool configured in Jenkins Global Tools
     }
 
     stages {
@@ -19,7 +19,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build with Maven') {
             steps {
                 bat 'mvn clean package'
             }
@@ -27,11 +27,15 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PAT')]) {
-                    powershell '''
-                        Write-Host "Logging into Docker Hub..."
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKER_CREDENTIALS_ID}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PAT'
+                )]) {
+                    bat '''
+                        echo Logging into Docker Hub...
                         docker logout
-                        $env:DOCKER_PAT | docker login -u $env:DOCKER_USER --password-stdin
+                        echo %DOCKER_PAT% | docker login -u %DOCKER_USER% --password-stdin
                     '''
                 }
             }
