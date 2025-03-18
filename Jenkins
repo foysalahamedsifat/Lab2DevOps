@@ -3,23 +3,22 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
-        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'  // Jenkins credential ID for Docker Hub PAT
+        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'
     }
 
     tools {
-        maven 'Maven3'  // Maven tool configured in Jenkins Global Tools
+        maven 'Maven3'
     }
 
     stages {
         stage('Checkout') {
             steps {
                 git url: 'https://github.com/foysalahamedsifat/Lab2DevOps.git',
-                    credentialsId: "${DOCKER_CREDENTIALS_ID}",
                     branch: 'main'
             }
         }
 
-        stage('Build with Maven') {
+        stage('Build') {
             steps {
                 bat 'mvn clean package'
             }
@@ -32,10 +31,11 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PAT'
                 )]) {
-                    bat '''
-                        echo Logging into Docker Hub...
+                    powershell '''
+                        Write-Host "Logging into Docker Hub..."
                         docker logout
-                        echo %DOCKER_PAT% | docker login -u %DOCKER_USER% --password-stdin
+                        $ErrorActionPreference = "Stop"
+                        $env:DOCKER_PAT | docker login -u $env:DOCKER_USER --password-stdin
                     '''
                 }
             }
@@ -43,27 +43,20 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat "docker build -t ${DOCKER_IMAGE} ."
+                powershell "docker build -t ${env.DOCKER_IMAGE} ."
             }
         }
 
         stage('Docker Push') {
             steps {
-                bat "docker push ${DOCKER_IMAGE}"
+                powershell "docker push ${env.DOCKER_IMAGE}"
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up...'
-            bat 'docker logout'
-        }
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
+            powershell 'docker logout'
         }
     }
 }
