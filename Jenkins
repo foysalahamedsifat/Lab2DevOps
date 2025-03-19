@@ -30,12 +30,14 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PAT'
                 )]) {
-                    powershell '''
+                    powershell """
                         Write-Host "Logging into Docker Hub..."
                         docker logout
-                        $ErrorActionPreference = "Stop"
-                        echo $env:DOCKER_PAT | docker login -u $env:DOCKER_USER --password-stdin
-                    '''
+                        \$ErrorActionPreference = "Stop"
+
+                        Write-Host "Using Docker username: \$env:DOCKER_USER"
+                        echo \$env:DOCKER_PAT | docker login -u \$env:DOCKER_USER --password-stdin
+                    """
                 }
             }
         }
