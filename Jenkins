@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'  // DockerHub repo and tag
-        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'               // Jenkins Credentials ID (Docker Hub PAT stored here)
+        DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'
     }
 
     tools {
-        maven 'Maven3'   // Jenkins Global Tool Configuration > Maven3
+        maven 'Maven3'
     }
 
     stages {
@@ -21,8 +21,13 @@ pipeline {
             steps {
                 bat """
                     @echo off
+                    echo ================================================
                     echo Building the Maven Project...
                     mvn clean package
+                    IF %ERRORLEVEL% NEQ 0 (
+                        echo Maven build failed!
+                        exit /b 1
+                    )
                 """
             }
         }
@@ -36,15 +41,20 @@ pipeline {
                 )]) {
                     bat """
                         @echo off
+                        echo ================================================
                         echo Logging into Docker Hub...
-                        docker logout
-                        
+                        docker logout > nul 2>&1
+                        echo ================================================
                         echo Using Docker username: %DOCKER_USER%
+                        echo PAT starts with: %DOCKER_PAT:~0,10%*******
+                        echo ================================================
                         echo %DOCKER_PAT% | docker login -u %DOCKER_USER% --password-stdin
-                        
+
                         IF %ERRORLEVEL% NEQ 0 (
                             echo Docker login failed!
                             exit /b 1
+                        ) ELSE (
+                            echo Docker login successful!
                         )
                     """
                 }
@@ -55,12 +65,15 @@ pipeline {
             steps {
                 bat """
                     @echo off
+                    echo ================================================
                     echo Building Docker Image...
                     docker build -t %DOCKER_IMAGE% .
-                    
+
                     IF %ERRORLEVEL% NEQ 0 (
                         echo Docker build failed!
                         exit /b 1
+                    ) ELSE (
+                        echo Docker build successful!
                     )
                 """
             }
@@ -70,12 +83,15 @@ pipeline {
             steps {
                 bat """
                     @echo off
+                    echo ================================================
                     echo Pushing Docker Image to Docker Hub...
                     docker push %DOCKER_IMAGE%
-                    
+
                     IF %ERRORLEVEL% NEQ 0 (
                         echo Docker push failed!
                         exit /b 1
+                    ) ELSE (
+                        echo Docker push successful!
                     )
                 """
             }
@@ -86,8 +102,9 @@ pipeline {
         always {
             bat """
                 @echo off
+                echo ================================================
                 echo Logging out from Docker Hub...
-                docker logout
+                docker logout > nul 2>&1
             """
         }
 
