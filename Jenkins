@@ -19,7 +19,7 @@ pipeline {
 
         stage('Build Maven Project') {
             steps {
-                bat 'mvn clean package'  // Use 'sh' instead of 'bat' if using Linux agents
+                bat 'mvn clean package'  // Windows agents use 'bat'
             }
         }
 
@@ -30,13 +30,12 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PAT'
                 )]) {
-                    powershell """
-                        Write-Host "Logging into Docker Hub..."
+                    bat """
+                        echo Logging into Docker Hub...
                         docker logout
-                        \$ErrorActionPreference = "Stop"
-
-                        Write-Host "Using Docker username: \$env:DOCKER_USER"
-                        echo \$env:DOCKER_PAT | docker login -u \$env:DOCKER_USER --password-stdin
+                        
+                        echo Using Docker username: %DOCKER_USER%
+                        echo %DOCKER_PAT% | docker login -u %DOCKER_USER% --password-stdin
                     """
                 }
             }
@@ -44,18 +43,18 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                powershell """
-                    Write-Host "Building Docker Image..."
-                    docker build -t ${env.DOCKER_IMAGE} .
+                bat """
+                    echo Building Docker Image...
+                    docker build -t ${DOCKER_IMAGE} .
                 """
             }
         }
 
         stage('Docker Push') {
             steps {
-                powershell """
-                    Write-Host "Pushing Docker Image to Docker Hub..."
-                    docker push ${env.DOCKER_IMAGE}
+                bat """
+                    echo Pushing Docker Image to Docker Hub...
+                    docker push ${DOCKER_IMAGE}
                 """
             }
         }
@@ -63,7 +62,7 @@ pipeline {
 
     post {
         always {
-            powershell 'docker logout'
+            bat 'docker logout'
         }
         success {
             echo "Pipeline completed successfully! 🚀"
