@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
-        DOCKER_CREDENTIALS_ID = 'dockerhub-pat'
+        // Commenting out credentials for now
+        // DOCKER_CREDENTIALS_ID = 'dockerhub-pat'
     }
 
     tools {
@@ -32,32 +33,26 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
+        stage('Docker Login (Hardcoded)') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: "${DOCKER_CREDENTIALS_ID}",
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PAT'
-                )]) {
-                    bat """
-                        @echo off
-                        echo ================================================
-                        echo Logging into Docker Hub...
-                        docker logout > nul 2>&1
-                        echo ================================================
-                        echo Using Docker username: %DOCKER_USER%
-                        echo PAT starts with: %DOCKER_PAT:~0,10%*******
-                        echo ================================================
-                        echo %DOCKER_PAT% | docker login -u %DOCKER_USER% --password-stdin
+                bat """
+                    @echo off
+                    echo ================================================
+                    echo Logging into Docker Hub with HARDCODED credentials...
+                    docker logout > nul 2>&1
+                    echo ================================================
+                    echo Using Docker username: foysalahamedsifat
+                    echo PAT starts with: dckr_pat_-60YdNgoB7********
+                    echo ================================================
+                    echo dckr_pat_-60YdNgoB7Rzz0RnetwyCu4pu_8 | docker login -u foysalahamedsifat --password-stdin
 
-                        IF %ERRORLEVEL% NEQ 0 (
-                            echo Docker login failed!
-                            exit /b 1
-                        ) ELSE (
-                            echo Docker login successful!
-                        )
-                    """
-                }
+                    IF %ERRORLEVEL% NEQ 0 (
+                        echo Docker login failed!
+                        exit /b 1
+                    ) ELSE (
+                        echo Docker login successful!
+                    )
+                """
             }
         }
 
