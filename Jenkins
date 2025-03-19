@@ -3,8 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'foysalahamedsifat/lab2devops:latest'
-        // Commenting out credentials for now
-        // DOCKER_CREDENTIALS_ID = 'dockerhub-pat'
+        // DOCKER_CREDENTIALS_ID = 'dockerhub-pat' // Use Jenkins credentials in real projects!
     }
 
     tools {
@@ -25,27 +24,31 @@ pipeline {
                     echo ================================================
                     echo Building the Maven Project...
                     mvn clean package
+
                     IF %ERRORLEVEL% NEQ 0 (
                         echo Maven build failed!
                         exit /b 1
+                    ) ELSE (
+                        echo Maven build successful!
                     )
                 """
             }
         }
 
-        stage('Docker Login (Hardcoded)') {
+        stage('Docker Login (Hardcoded Insecure)') {
             steps {
                 bat """
                     @echo off
                     echo ================================================
-                    echo Logging into Docker Hub with HARDCODED credentials...
+                    echo Logging into Docker Hub (Hardcoded, Insecure)...
                     docker logout > nul 2>&1
                     echo ================================================
                     echo Using Docker username: foysalahamedsifat
                     echo PAT starts with: dckr_pat_-60YdNgoB7********
                     echo ================================================
-                    echo dckr_pat_-60YdNgoB7Rzz0RnetwyCu4pu_8 | docker login -u foysalahamedsifat --password-stdin
-
+                    
+                    docker login -u foysalahamedsifat -p dckr_pat_-60YdNgoB7Rzz0RnetwyCu4pu_8
+                    
                     IF %ERRORLEVEL% NEQ 0 (
                         echo Docker login failed!
                         exit /b 1
